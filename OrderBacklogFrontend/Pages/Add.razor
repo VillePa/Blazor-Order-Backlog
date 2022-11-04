@@ -1,0 +1,129 @@
+﻿@page "/add"
+@using System.Net.Http
+@using SharedLib
+@using MudBlazor
+@inject NavigationManager NavigationManager
+@inject ILogger<Index> Logger
+@inject HttpClient Http
+
+<h3>Add new order</h3>
+
+<div class="d-flex justify-content-start align-items-start">
+    <div class="row">
+        <div class="col-sm">
+   <EditForm Model="@o" OnValidSubmit="@Submit">
+                <p>
+                    <label>
+                        State:
+                        <select class="form-control" @bind="@o.State">
+                            <option>---Select---</option>
+                            <option value="not started">Not started</option>
+                            <option value="dismantle/cleaning">Dismantle/cleaning</option>
+                            <option value="assembly">Assembly</option>
+                            <option value="test/paint">Test and paint</option>
+                            <option value="finished">Finished</option>
+                            <option value="dispatched">Dispatched</option>
+                        </select>
+                        @*<InputText class="form-control" @bind-Value="@o.State" />*@
+                       @* <MudSelect T="string" Label="State" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                            <MudSelectItem Value="@("Not started")" />
+                            <MudSelectItem Value="@("dismantle/cleaning")" />
+                            <MudSelectItem Value="@("assembly")" />
+                            <MudSelectItem Value="@("hot test/painting")" />
+                            <MudSelectItem Value="@("dispatch")" />
+                        </MudSelect>*@
+                    </label>
+                </p>
+        <p>
+            <label>
+                Order number:
+                <InputText class="form-control" @bind-Value="@o.OrderNumber" />
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Specification:
+                <InputText class="form-control" @bind-Value="@o.EngineSpecification" />
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Engine S/N:
+                <InputText class="form-control" @bind-Value="@o.EngineSerialNumber" />
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Engine type 1:
+                <InputText class="form-control" @bind-Value="@o.EngineType1" />
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Engine type 2:
+                <InputText class="form-control" @bind-Value="@o.EngineType2" />
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Customer:
+                <InputText class="form-control" @bind-Value="@o.Customer" />
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Order date:
+                <InputDate class="form-control" @bind-Value="@o.OrderDate" />
+            </label>
+        </p>
+
+        <p>
+            <label>
+                Delivery date:
+                <InputDate class="form-control" @bind-Value="@o.DeliveryDate" />
+            </label>
+        </p>
+
+        <button type="submit" class="btn btn-primary">Add new</button>
+        <button type="reset" class="btn btn-secondary">Clear fields</button>
+
+    </EditForm>
+        </div>
+        @if (newOrders != null) { 
+        <div class="col-sm">
+                @foreach (var item in newOrders)
+                {
+                <div class="added">
+                    @item
+                </div>
+                }
+        </div>
+        }
+    </div>
+</div>
+
+
+
+@code {
+    private const string ServiceEndpoint = "https://localhost:7026/order/";
+
+    OrderDTO o = new();
+    List<string> newOrders = new();
+
+    async Task Submit(){
+
+        Logger.LogInformation($"Adding new order: {o.OrderNumber}, {o.EngineType1} {o.EngineType2}, {o.EngineSerialNumber}, {o.Customer}");
+
+        var result = await Http.PostAsJsonAsync<OrderDTO>(ServiceEndpoint, o);
+
+        if(result.IsSuccessStatusCode)
+        newOrders.Add(o.OrderNumber + " " +o.EngineType1 + " " + o.EngineType2 + " " + o.EngineSerialNumber);
+    }
+
+}

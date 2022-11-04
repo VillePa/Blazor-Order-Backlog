@@ -1,0 +1,12 @@
+﻿@using MudBlazor
+<div class="alert alert-warning mt-4">
+    <MudIcon Icon="@Icons.Filled.SettingsSystemDaydream"></MudIcon>
+    <strong>@Title</strong>
+
+</div>
+
+@code {
+    // Demonstrates how a parent component can supply parameters
+    [Parameter]
+    public string? Title { get; set; }
+}

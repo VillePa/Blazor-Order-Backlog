@@ -1,0 +1,59 @@
+﻿@using System.Net.Http
+@using SharedLib
+@using MudBlazor
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ILogger<Index> Logger
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h3">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" />
+            Delete order?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Value="@order.Id" Label="Id" ReadOnly="true" />
+        <MudTextField Value="@order.OrderNumber" Label="Order number" ReadOnly="true" />
+        <MudTextField Value="@order.EngineSerialNumber" Label="S/N" ReadOnly="true" />
+        <MudTextField Value="@order.EngineSpecification" Label="Specification" ReadOnly="true" />
+        <MudTextField Value="@order.EngineType1" Label="Type 1" ReadOnly="true" />
+        <MudTextField Value="@order.EngineType2" Label="Type 2" ReadOnly="true" />
+        <MudTextField Value="@order.Customer" Label="Customer" ReadOnly="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteOrder">Delete order</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    
+    [Parameter] 
+    public OrderDTO order { get; set; } = new OrderDTO();
+
+    private const string ServiceEndpoint = "https://localhost:7026/";
+
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    async Task DeleteOrder()
+    {
+        var result = await Http.DeleteAsync(ServiceEndpoint + order.Id);
+        Snackbar.Add("Order Deleted", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(order.Id));
+
+        
+
+    }
+}
+
+
+
+

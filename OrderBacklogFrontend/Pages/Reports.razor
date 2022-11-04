@@ -1,0 +1,62 @@
+﻿@page "/reports"
+@using System.Net.Http
+@using SharedLib
+@using MudBlazor
+@using System.Text.Json
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ILogger<Index> Logger
+@inject HttpClient Http
+
+<h3>Reports</h3>
+
+<MudButton Size="Size.Large" Variant="Variant.Filled" Color="Color.Success" OnClick="@((e) => Report("finished"))"> Finished engines report </MudButton>
+<MudButton Size="Size.Large" Variant="Variant.Filled" Color="Color.Warning" OnClick="@((e) => Report("assembly"))"> In assembly engines report </MudButton>
+
+@if (orders != null)
+{
+    <MudTable Items="@orders" Dense="true" Hover="true" Bordered="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>State</MudTh>
+            <MudTh>Order number</MudTh>
+            <MudTh>Specification</MudTh>
+            <MudTh>S/N</MudTh>
+            <MudTh>Type 1</MudTh>
+            <MudTh>Type 2</MudTh>
+            <MudTh>Customer</MudTh>
+            <MudTh>Order date</MudTh>
+            <MudTh>Delivery date</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="State">@context.State</MudTd>
+            <MudTd DataLabel="Order number">@context.OrderNumber</MudTd>
+            <MudTd DataLabel="Specification">@context.EngineSpecification</MudTd>
+            <MudTd DataLabel="S/N">@context.EngineSerialNumber</MudTd>
+            <MudTd DataLabel="Type 1">@context.EngineType1</MudTd>
+            <MudTd DataLabel="Type 2">@context.EngineType2</MudTd>
+            <MudTd DataLabel="Customer">@context.Customer</MudTd>
+            <MudTd DataLabel="Order date">@context.OrderDate.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd DataLabel="Delivery date">@context.DeliveryDate.ToString("dd/MM/yyyy")</MudTd>
+           
+        </RowTemplate>
+      
+    </MudTable>
+}else{
+    <h5>Select report</h5>
+}
+@code {
+    private OrderDTO[]? orders;
+    private string state = "";
+
+    private const string ServiceEndpoint = "https://localhost:7026/byState/";
+
+    //protected override async Task OnInitializedAsync() => orders = await Http.GetFromJsonAsync<OrderDTO[]>(ServiceEndpoint, order.State);
+
+    async Task Report(string state) => orders = await Http.GetFromJsonAsync<OrderDTO[]>(ServiceEndpoint + state); 
+    
+   
+
+    }
+

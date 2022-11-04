@@ -1,0 +1,133 @@
+﻿@page "/orders"
+@using System.Net.Http
+@using SharedLib
+@using MudBlazor
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ILogger<Index> Logger
+@inject HttpClient Http
+
+
+<h3>Engine orders</h3>
+
+
+<MudTable Items="@orders" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<OrderDTO,bool>(FilterFunc1)" @bind-SelectedItem="selectedOrder">
+    <ToolBarContent>
+        @*<MudText Typo="Typo.h6">Engine orders</MudText>*@
+        @*<MudSpacer />*@
+        <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Id</MudTh>
+        <MudTh>State</MudTh>
+        <MudTh>Order number</MudTh>
+        <MudTh>Specification</MudTh>
+        <MudTh>S/N</MudTh>
+        <MudTh>Type 1</MudTh>
+        <MudTh>Type 2</MudTh>
+        <MudTh>Customer</MudTh>
+        <MudTh>Order date</MudTh>
+        <MudTh>Delivery date</MudTh>
+        <MudTh></MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">@context.Id</MudTd>
+        <MudTd DataLabel="State">@context.State</MudTd>
+        <MudTd DataLabel="Order number">@context.OrderNumber</MudTd>
+        <MudTd DataLabel="Specification">@context.EngineSpecification</MudTd>
+        <MudTd DataLabel="S/N">@context.EngineSerialNumber</MudTd>
+        <MudTd DataLabel="Type 1">@context.EngineType1</MudTd>
+        <MudTd DataLabel="Type 2">@context.EngineType2</MudTd>
+        <MudTd DataLabel="Customer">@context.Customer</MudTd>
+        <MudTd DataLabel="Order date">@context.OrderDate.ToString("dd/MM/yyyy")</MudTd>
+        <MudTd DataLabel="Delivery date">@context.DeliveryDate.ToString("dd/MM/yyyy")</MudTd>
+        <MudTd>
+            <MudButton Size="Size.Medium" Variant="Variant.Text" OnClick="@((e) => Edit(context))">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Color="Color.Success"></MudIcon>
+            </MudButton>
+            @*<MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Success" StartIcon="@Icons.Material.Filled.Edit"  OnClick="@((e) => Edit(context))"></MudButton>*@
+        </MudTd>
+         <MudTd>
+            <MudButton Size="Size.Medium" Variant="Variant.Text" OnClick="@((e) => Delete(context))">
+                <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error"></MudIcon>
+            </MudButton>
+            @*<MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.DeleteForever" OnClick="@((e) => Delete(context))"></MudButton>*@
+        </MudTd>
+        
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+<div class="d-flex flex-wrap mt-4">
+    <MudSwitch @bind-Checked="@hover" Color="Color.Primary">Hover</MudSwitch>
+    <MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Dense</MudSwitch>
+    <MudSwitch @bind-Checked="@striped" Color="Color.Tertiary">Striped</MudSwitch>
+    <MudSwitch @bind-Checked="@bordered" Color="Color.Warning">Bordered</MudSwitch>
+    <MudSpacer />
+    @*<div style="min-width:200px;">
+        <MudText
+            Inline="true" Class="align-self-center">Selected: @selectedOrder?.OrderNumber</MudText>
+    </div>*@
+    
+</div>
+
+
+
+@code {
+    
+    private bool dense = true;
+    private bool hover = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString1 = " ";
+    private OrderDTO selectedOrder = null;
+    //private HashSet<OrderDTO> selectedItems = new HashSet<Element>();
+    private OrderDTO[]? orders;
+    //private const string ServiceEndpoint = "https://orderbacklogapimanagement.azure-api.net/orders";
+    private const string ServiceEndpoint = "https://localhost:7026/orders/";
+    
+
+    private bool FilterFunc1(OrderDTO element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(OrderDTO element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.OrderNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Customer.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.EngineType1} {element.EngineType2}".Contains(searchString))
+            return true;
+        return false;
+    }
+	
+
+	protected override async Task OnInitializedAsync()
+	{
+		orders = await Http.GetFromJsonAsync<OrderDTO[]>(ServiceEndpoint);
+	}
+
+
+	async Task Delete(OrderDTO order)
+	{
+		var parameters = new DialogParameters { ["order"] = order };
+		var dialog = DialogService.Show<DeleteDialog>("Delete order", parameters);
+		var result = await dialog.Result;
+
+		NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+	}
+
+	async Task Edit(OrderDTO order)
+	{
+		var parameters = new DialogParameters { ["order"] = order };
+		var dialog = DialogService.Show<EditDialog>("Save changes", parameters);
+		var result = await dialog.Result;
+
+		NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+	}
+	
+}

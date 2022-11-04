@@ -1,0 +1,69 @@
+﻿@using System.Net.Http
+@using SharedLib
+@using MudBlazor
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+@inject ILogger<Index> Logger
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+
+
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h3">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3 mb-n1" />
+            Edit order
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="@order.Id" Label="Id" ReadOnly="true" />
+        <MudTextField @bind-Value="@order.OrderNumber" Label="Order number" />
+
+        <MudSelect @bind-Value="@order.State" Label="State">
+            <MudSelectItem Value="@("not started")">Not started</MudSelectItem>
+            <MudSelectItem Value="@("dismantle/cleaning")">Dismantle/cleaning</MudSelectItem>
+            <MudSelectItem Value="@("assembly")">Assembly</MudSelectItem>
+            <MudSelectItem Value="@("test/paint")">Test and paint</MudSelectItem>
+            <MudSelectItem Value="@("finished")">Finished</MudSelectItem>
+            <MudSelectItem Value="@("dispatched")">Dispatched</MudSelectItem>
+</MudSelect>
+        <MudTextField @bind-Value="@order.EngineSerialNumber" Label="S/N" />
+        <MudTextField @bind-Value="@order.EngineSpecification" Label="Specification"  />
+        <MudTextField @bind-Value="@order.EngineType1" Label="Type 1"  />
+        <MudTextField @bind-Value="@order.EngineType2" Label="Type 2" />
+        <MudTextField @bind-Value="@order.Customer" Label="Customer" />
+        <MudTextField @bind-Value="@order.OrderDate" Format="dd/MM/yyyy" Label="Order date" />
+        <MudTextField @bind-Value="@order.DeliveryDate" Format="dd/MM/yyyy" Label="Delivery Date" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="EditOrder">Save changes</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] 
+    public OrderDTO order { get; set; } = new OrderDTO();
+
+    private const string ServiceEndpoint = "https://localhost:7026/";
+
+     private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    async Task EditOrder()
+    {
+        var result = await Http.PutAsJsonAsync<OrderDTO>(ServiceEndpoint + order.Id, order);
+        Snackbar.Add("Order Deleted", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(order.Id));
+
+    }
+
+  }
+
