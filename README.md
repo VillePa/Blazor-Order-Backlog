@@ -1,4 +1,4 @@
 # OrderBacklog
 
-Simple Blazor-app for order handling. APi with endspoints for CRUD-operations into SQLite database.
+Simple Blazor-app for order handling. Api with endpoints for CRUD-operations into SQLite database.
 Frontend uses some MudBlazor components. 
